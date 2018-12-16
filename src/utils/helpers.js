@@ -1,12 +1,12 @@
 import _ from "lodash";
 
+export const getTimestamp = () => new Date().toLocaleTimeString();
+
 export const getInitState = () => ({
   buyOrders: [],
   sellOrders: [],
   matches: []
 });
-
-export const getTimestamp = () => new Date().toLocaleTimeString();
 
 export const createMatchRecord = (order1, order2, price, quantity) => {
   const orders = [order1, order2];
