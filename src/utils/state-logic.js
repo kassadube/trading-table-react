@@ -1,3 +1,13 @@
+// I feel very shame bcz of this,
+// this code was written years ago,
+// that was my first steps into FP.
+// So if you see this comment
+// I'm still busy(lazy) with other projects
+// and can't find time(push myself)
+// to get rid of mutability and lodash.
+// however, I need to show something to
+// potential employers, right?
+
 import _ from "lodash";
 
 import { createMatchRecord } from "./helpers";
