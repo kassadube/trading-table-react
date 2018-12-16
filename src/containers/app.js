@@ -5,36 +5,40 @@ import Header from "../components/header";
 import OrderTable from "../components/order-table";
 import MatchTable from "../components/match-table";
 
-import { getStateStream, resetState } from "../utils/api";
+import { store$, restart$ } from "../utils/api";
 import { getInitState } from "../utils/helpers";
 
 export default class App extends Component {
+  _subscription = null;
+
   constructor(props) {
     super(props);
-    this.state = { state: getInitState() };
+    this.state = { store: getInitState() };
   }
 
   componentDidMount() {
-    this.setState({
-      ...this.state,
-      subscription: getStateStream().subscribe(state =>
-        this.setState({ ...this.state, state })
-      )
+    this._subscription = store$.subscribe(store => {
+      this.setState({ store });
     });
+    restart$.next(1000);
   }
 
   componentWillUnmount() {
-    this.state.subscription.unsubscribe();
+    this._subscription.unsubscribe();
   }
 
   render() {
-    const { buy_orders, sell_orders, matches } = this.state.state;
+    const { buyOrders, sellOrders, matches } = this.state.store;
     return (
       <Grid>
-        <Header onBtnClick={resetState} />
+        <Header
+          onBtnClick={() => {
+            restart$.next(1000);
+          }}
+        />
         <Row>
-          <OrderTable orderType={"buy"} orders={buy_orders} limit={20} />
-          <OrderTable orderType={"sell"} orders={sell_orders} limit={20} />
+          <OrderTable orderType={"buy"} orders={buyOrders} limit={20} />
+          <OrderTable orderType={"sell"} orders={sellOrders} limit={20} />
           <MatchTable matches={matches} limit={30} />
         </Row>
       </Grid>

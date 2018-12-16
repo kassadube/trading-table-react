@@ -2,36 +2,34 @@ import _ from "lodash";
 
 import { createMatchRecord } from "./helpers";
 
-export const calculateNewState = (order, state) => {
-  const state_clone = _.cloneDeep(state);
-  process(order, state_clone);
-  return state_clone;
+export const getNewState = (order, state) => {
+  process(order, state);
+  return state;
 };
 
-const getSearchTarget = (type, { sell_orders, buy_orders }) =>
-  type === "buy" ? sell_orders : buy_orders;
-const getStateStorageByType = (type, { sell_orders, buy_orders }) =>
-  type === "buy" ? buy_orders : sell_orders;
+const getSearchTarget = (type, { sellOrders, buyOrders }) =>
+  type === "buy" ? sellOrders : buyOrders;
+const getStateStorageByType = (type, { sellOrders, buyOrders }) =>
+  type === "buy" ? buyOrders : sellOrders;
 const getFilterPredicateForOrder = ({ type, price }) =>
   type === "buy" ? o => o.price <= price : o => o.price >= price;
 
 const findMatches = (order, state) => {
-  const { type, price } = order;
-  const search_target = getSearchTarget(type, state);
+  const searchTarget = getSearchTarget(order.type, state);
   const filterPredicate = getFilterPredicateForOrder(order);
-  return _.chain(search_target)
+  return _.chain(searchTarget)
     .filter(filterPredicate)
     .orderBy(["price", "id"], ["asc", "desc"])
     .value();
 };
 
 const calculateMatch = (order, match) => {
-  const match_price =
+  const matchPrice =
     order.price === match.price
       ? order.price
       : Math.round((order.price + match.price) / 2);
-  const match_quantity = Math.min(order.quantity, match.quantity);
-  return [match_price, match_quantity];
+  const matchQuantity = Math.min(order.quantity, match.quantity);
+  return [matchPrice, matchQuantity];
 };
 
 const assignNewQuantity = (order, match) => {
@@ -43,24 +41,24 @@ const assignNewQuantity = (order, match) => {
 
 const process = (order, state) => {
   const { type, price } = order;
-  const search_target = getSearchTarget(type, state);
-  const storage_for_order = getStateStorageByType(type, state);
+  const searchTarget = getSearchTarget(type, state);
+  const storageForOrder = getStateStorageByType(type, state);
 
   const matches = findMatches(order, state);
-  if (!matches.length) return storage_for_order.push(order);
+  if (!matches.length) return storageForOrder.push(order);
   const match = _.last(matches);
-  _.pull(search_target, match);
+  _.pull(searchTarget, match);
 
-  const [match_price, match_quantity] = calculateMatch(order, match);
-  const match_record = createMatchRecord(
+  const [matchPrice, matchQuantity] = calculateMatch(order, match);
+  const matchRecord = createMatchRecord(
     order,
     match,
-    match_price,
-    match_quantity
+    matchPrice,
+    matchQuantity
   );
-  state.matches.push(match_record);
+  state.matches.push(matchRecord);
 
-  const [upd_order, upd_match] = assignNewQuantity(order, match);
-  if (upd_match.quantity) search_target.push(upd_match);
-  if (upd_order.quantity) process(upd_order, state);
+  const [updatedOrder, updatedMatch] = assignNewQuantity(order, match);
+  if (updatedMatch.quantity) searchTarget.push(updatedMatch);
+  if (updatedOrder.quantity) process(updatedOrder, state);
 };

@@ -1,15 +1,15 @@
 import _ from "lodash";
 
 export const getInitState = () => ({
-  buy_orders: [],
-  sell_orders: [],
+  buyOrders: [],
+  sellOrders: [],
   matches: []
 });
 
 export const getTimestamp = () => new Date().toLocaleTimeString();
 
-export const createMatchRecord = (order_1, order_2, price, quantity) => {
-  const orders = [order_1, order_2];
+export const createMatchRecord = (order1, order2, price, quantity) => {
+  const orders = [order1, order2];
   const buyer = _.chain(orders)
     .filter(["type", "buy"])
     .head()
