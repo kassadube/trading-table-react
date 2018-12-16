@@ -1,34 +1,20 @@
 import React, { Component } from "react";
-
 import { Grid, Row } from "react-bootstrap";
+
 import Header from "../components/header";
 import OrderTable from "../components/order-table";
 import MatchTable from "../components/match-table";
 
+import { withStream } from "../utils/provider";
 import { store$, restart$ } from "../utils/api";
-import { getInitState } from "../utils/helpers";
 
-export default class App extends Component {
-  _subscription = null;
-
-  constructor(props) {
-    super(props);
-    this.state = { store: getInitState() };
-  }
-
+class App extends Component {
   componentDidMount() {
-    this._subscription = store$.subscribe(store => {
-      this.setState({ store });
-    });
     restart$.next(1000);
   }
 
-  componentWillUnmount() {
-    this._subscription.unsubscribe();
-  }
-
   render() {
-    const { buyOrders, sellOrders, matches } = this.state.store;
+    const { buyOrders = [], sellOrders = [], matches = [] } = this.props.store;
     return (
       <Grid>
         <Header
@@ -45,3 +31,5 @@ export default class App extends Component {
     );
   }
 }
+
+export default withStream(App)(store$);

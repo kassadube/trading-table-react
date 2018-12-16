@@ -11,11 +11,12 @@ import {
 import { getInitState } from "./helpers";
 import { getNewState } from "./state-logic";
 
-const endpoint = "http://localhost:5001";
-const apiStartMarker$ = new Subject(0);
 export const restart$ = new Subject();
 export const orders$ = new Subject();
 export const store$ = new Subject(getInitState());
+
+const apiStartMarker$ = new Subject(0);
+const endpoint = "http://localhost:5001";
 
 restart$
   .pipe(
